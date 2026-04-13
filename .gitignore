@@ -1,0 +1,40 @@
+# R package specific
+*.Rhistory
+*.RData
+*.Rds
+.Rproj.user
+
+# Environment variables with credentials
+.env
+*.env
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+
+# OS specific
+.DS_Store
+Thumbs.db
+
+# R build artifacts
+*.tar.gz
+*.zip
+
+# Documentation artifacts
+*.html
+*.pdf
+
+# Test files (keep examples only)
+test_*.R
+demo_*.R
+*_test.R
+*_demo.R
+
+# Sensitive configuration files
+config.R
+credentials.R
+secrets.R
+.git-credentials

@@ -1,0 +1,18 @@
+Package: fabricConnectAD
+Type: Package
+Title: Connect to Microsoft Fabric via ODBC
+Version: 1.0.0
+Authors@R: person(given = "Derick", family = "Imbati", email = "derick.imbati@aku.edu", role = c("aut", "cre"))
+Description: Connect to Microsoft Fabric Data Engineering Lakehouse endpoints through the Microsoft ODBC Driver for Microsoft Fabric Data Engineering using username/password authentication with secure credential storage.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Imports:
+    DBI,
+    odbc,
+    digest,
+    shiny,
+    httpuv,
+    jsonlite
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.3
