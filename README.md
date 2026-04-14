@@ -212,6 +212,41 @@ print(results)
 fabric_disconnect(con)
 ```
 
+### UZIMA Data Queries
+
+#### Fitbit Daily Steps Data
+```r
+con <- fabric_connect_web(fabric_endpoint, authentication_method = "ActiveDirectoryPassword")
+
+# Query Fitbit daily steps data for feasibility study participants
+df <- dbGetQuery(con, "
+SELECT 
+    [participantidentifier],
+    [date],
+    [steps]
+FROM [_vw_factfitbitdailydata]
+WHERE [participantidentifier] IN (
+    SELECT [participantidentifier]
+    FROM [_vw_feasibility_study_baseline]
+)")
+
+print(head(df, 3))
+```
+
+#### Qualtrics Survey Data
+```r
+# Query all Qualtrics survey data
+qualtrics_data <- dbGetQuery(con, "SELECT * FROM Qualtrics")
+
+# Display first few rows
+print(head(qualtrics_data, 5))
+
+# Get survey metadata
+print("Qualtrics dataset info:")
+print(dim(qualtrics_data))
+print(names(qualtrics_data))
+```
+
 ## Security
 
 The package implements enterprise-level security:
