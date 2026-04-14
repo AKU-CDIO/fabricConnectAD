@@ -142,45 +142,167 @@ Web-based authentication for VM environments. Opens a local browser for secure c
 
 **Parameters:**
 - `fabric_endpoint` - Fabric endpoint URL (required)
-- `database_name` - Database name (optional, defaults to "uzima_db_backup")
-- `email` - User email (optional, pre-fills form)
-- `password` - User password (optional, pre-fills form)
+- `database_name` - Database name (optional, default: "uzima_db_backup")
+- `email` - User email (optional, default: NULL)
+- `password` - User password (optional, default: NULL)
 - `driver` - ODBC driver name (default: "ODBC Driver 18 for SQL Server")
 - `port` - Server port (default: 1433)
 - `timeout` - Connection timeout in seconds (default: 30)
 - `authentication_method` - Authentication method (default: "ActiveDirectoryPassword")
 - `web_port` - Local web server port (default: 8765)
-- `web_timeout` - Web authentication timeout (default: 300)
+- `web_timeout` - Web authentication timeout in seconds (default: 300)
 - `host` - Local server host (default: "127.0.0.1")
 
+**Example:**
+```r
+# Basic usage with defaults
+con <- fabric_connect_web("your-endpoint.datawarehouse.fabric.microsoft.com")
+
+# Advanced usage with custom parameters
+con <- fabric_connect_web(
+  fabric_endpoint = "your-endpoint.datawarehouse.fabric.microsoft.com",
+  database_name = "HCW_fitbit_data",
+  email = "researcher@university.edu",
+  authentication_method = "ActiveDirectoryPassword",
+  web_port = 8080,
+  web_timeout = 600,
+  timeout = 60
+)
+```
+
 ### `fabric_connect_ad()`
-Connect to Microsoft Fabric endpoint.
+Connect to Microsoft Fabric endpoint using traditional authentication.
 
 **Parameters:**
 - `fabric_endpoint` - Fabric endpoint URL (required)
-- `database_name` - Database name (optional, NULL = connect to master for discovery)
-- `email` - User email (default: prompts if not provided)
-- `password` - User password (optional, prompts if not provided)
+- `database_name` - Database name (optional, default: NULL)
+- `email` - User email (optional, default: NULL)
+- `password` - User password (optional, default: NULL)
 - `store_credentials` - Store credentials securely (default: FALSE)
 - `prompt_if_missing` - Prompt for missing credentials (default: TRUE)
+- `driver` - ODBC driver name (default: "ODBC Driver 18 for SQL Server")
+- `port` - Server port (default: 1433)
+- `timeout` - Connection timeout in seconds (default: 30)
+- `authentication_method` - Authentication method (default: "ActiveDirectoryPassword")
+
+**Example:**
+```r
+# Basic usage
+con <- fabric_connect_ad("your-endpoint.datawarehouse.fabric.microsoft.com")
+
+# With credential storage
+con <- fabric_connect_ad(
+  fabric_endpoint = "your-endpoint.datawarehouse.fabric.microsoft.com",
+  database_name = "uzima_db_backup",
+  email = "researcher@university.edu",
+  store_credentials = TRUE,
+  authentication_method = "ActiveDirectoryPassword"
+)
+```
 
 ### `fabric_list_databases(con)`
 List all databases you have access to.
 
+**Parameters:**
+- `con` - Database connection object (required)
+
+**Example:**
+```r
+con <- fabric_connect_web("your-endpoint.datawarehouse.fabric.microsoft.com")
+databases <- fabric_list_databases(con)
+print(databases)
+```
+
 ### `fabric_list_tables(con)`
-List all tables in the connected database.
+List all tables in connected database.
+
+**Parameters:**
+- `con` - Database connection object (required)
+
+**Example:**
+```r
+con <- fabric_connect_web("your-endpoint.datawarehouse.fabric.microsoft.com")
+tables <- fabric_list_tables(con)
+print(tables)
+```
 
 ### `fabric_read_table(con, table_name, limit = 1000, where = NULL)`
 Read data from a table with optional filtering.
 
+**Parameters:**
+- `con` - Database connection object (required)
+- `table_name` - Name of table to read (required)
+- `limit` - Maximum number of rows to return (default: 1000)
+- `where` - SQL WHERE clause for filtering (optional, default: NULL)
+
+**Example:**
+```r
+con <- fabric_connect_web("your-endpoint.datawarehouse.fabric.microsoft.com")
+
+# Read first 100 rows
+data <- fabric_read_table(con, "_vw_factfitbitdailydata", limit = 100)
+
+# Read with filtering
+filtered_data <- fabric_read_table(
+  con, 
+  "_vw_factfitbitdailydata", 
+  limit = 50,
+  where = "steps > 10000 AND date >= '2024-01-01'"
+)
+```
+
 ### `fabric_execute_query(con, sql)`
 Execute custom SQL queries.
 
+**Parameters:**
+- `con` - Database connection object (required)
+- `sql` - SQL query string (required)
+
+**Example:**
+```r
+con <- fabric_connect_web("your-endpoint.datawarehouse.fabric.microsoft.com")
+
+# Simple query
+results <- fabric_execute_query(con, "SELECT COUNT(*) as total_records FROM _vw_factfitbitdailydata")
+
+# Complex query with joins
+results <- fabric_execute_query(con, "
+SELECT 
+    p.[ParticipantIdentifier],
+    p.[Age],
+    f.[date],
+    f.[steps]
+FROM [_vw_dimenrolledparticipants] p
+JOIN [_vw_factfitbitdailydata] f ON p.[ParticipantIdentifier] = f.[participantidentifier]
+WHERE p.[Age] BETWEEN 18 AND 25
+ORDER BY f.[date] DESC
+")
+```
+
 ### `fabric_disconnect(con)`
-Close the database connection.
+Close database connection.
+
+**Parameters:**
+- `con` - Database connection object (required)
+
+**Example:**
+```r
+con <- fabric_connect_web("your-endpoint.datawarehouse.fabric.microsoft.com")
+# ... do work ...
+fabric_disconnect(con)
+```
 
 ### `clear_fabric_credentials()`
 Remove stored credentials securely.
+
+**Parameters:**
+- None
+
+**Example:**
+```r
+# Clear all stored credentials
+clear_fabric_credentials()
+```
 
 ## Usage Examples
 
