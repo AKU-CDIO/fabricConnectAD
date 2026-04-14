@@ -135,36 +135,65 @@ fabric_connect_web <- function(
       if (identical(req$REQUEST_METHOD, "GET")) {
         body <- sprintf('
           <html>
-          <head><style>
-            body{font-family:sans-serif; background:#f4f7f9; display:flex; justify-content:center; padding-top:50px;}
-            .box{background:white; padding:30px; border-radius:8px; box-shadow:0 2px 10px rgba(0,0,0,0.1); width:350px;}
-            input{display:block; width:100%%; margin:10px 0; padding:10px; border:1px solid #ccc; border-radius:4px;}
-            button{width:100%%; padding:10px; background:#0078d4; color:white; border:none; border-radius:4px; cursor:pointer;}
-          </style></head>
-          <body><div class="box">
-            <h2>Fabric Login</h2>
-            <form method="POST" action="/connect">
-              <input type="text" name="email" placeholder="Email" value="%s" required>
-              <input type="password" name="password" placeholder="Password" required>
-              <button type="submit">Connect to R</button>
-            </form>
-          </div></body></html>', if(is.null(email)) "" else email)
+            <head><style>
+              body{font-family:sans-serif; background:#f4f7f9; display:flex; justify-content:center; padding-top:50px;}
+              .box{background:white; padding:30px; border-radius:8px; box-shadow:0 2px 10px rgba(0,0,0,0.1); width:400px;}
+              input, select{display:block; width:100%%; margin:10px 0; padding:10px; border:1px solid #ddd; border-radius:4px;}
+              button{width:100%%; padding:10px; background:#0078d4; color:white; border:none; border-radius:4px; cursor:pointer;}
+              button:hover{background:#005a9e;}
+              .security{margin-top:20px; padding:15px; background:#fff3cd; border:1px solid #ffeaa7; border-radius:4px; font-size:12px; color:#856404;}
+              .title{text-align:center; margin-bottom:20px;}
+            </style></head>
+            <body><div class="box">
+              <div class="title"><h2>CDIO UZIMA Data Access</h2></div>
+              <form method="POST" action="/connect">
+                <input type="text" name="email" placeholder="Email" value="%s" required>
+                <input type="password" name="password" placeholder="Password" required>
+                <select name="database" required>
+                  <option value="">Select Database</option>
+                  <option value="ALL">ALL (Connect to endpoint)</option>
+                  <option value="uzima_db_backup">uzima_db_backup</option>
+                  <option value="HCW_fitbit_data">HCW_fitbit_data</option>
+                  <option value="Qualtrics">Qualtrics</option>
+                </select>
+                <button type="submit">Connect to R</button>
+              </form>
+              <div class="security">
+                <strong>Security Notice:</strong> CDIO UZIMA--Data to be only accessed in VM only
+              </div>
+            </div></body></html>', if(is.null(email)) "" else email)
         return(list(status = 200L, headers = list("Content-Type" = "text/html"), body = body))
       }
 
       if (identical(req$REQUEST_METHOD, "POST") && identical(req$PATH_INFO, "/connect")) {
         formData <- parse_form_body(req)
+        
+        # Handle database selection
+        selected_db <- if (is.null(formData$database) || formData$database == "ALL") {
+          NULL  # Connect to endpoint (no database)
+        } else {
+          formData$database  # Connect to specific database
+        }
+        
         tryCatch({
+          # This runs in the R session context
           con <- DBI::dbConnect(
             odbc::odbc(),
-            Driver = driver, Server = fabric_endpoint, Database = database_name,
+            Driver = driver, Server = fabric_endpoint, Database = selected_db,
             Authentication = authentication_method, UID = formData$email, PWD = formData$password,
             Encrypt = "yes", TrustServerCertificate = "no", Port = port, Timeout = timeout
           )
           state$connection <- con
           state$done <- TRUE
+          
+          success_msg <- if (is.null(selected_db)) {
+            "Successfully connected to Fabric endpoint"
+          } else {
+            paste("Successfully connected to", selected_db)
+          }
+          
           return(list(status = 200L, headers = list("Content-Type" = "text/html"), 
-                      body = "<h3>Success! You can close this tab.</h3>"))
+                      body = paste("<h3>", success_msg, "</h3><p>You can close this tab.</p>")))
         }, error = function(e) {
           return(list(status = 200L, headers = list("Content-Type" = "text/html"), 
                       body = paste("<h3>Failed</h3><pre>", e$message, "</pre><a href='/'>Retry</a>")))
