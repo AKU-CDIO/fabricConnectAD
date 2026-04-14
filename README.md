@@ -69,32 +69,6 @@ data <- fabric_read_table(con_web, tables[1], limit = 100)
 fabric_disconnect(con_web)
 ```
 
-### Traditional Authentication
-
-```r
-library(fabricConnectAD)
-
-# Connect to Fabric endpoint (will prompt for credentials)
-fabric_endpoint <- "your-endpoint.datawarehouse.fabric.microsoft.com"
-con <- fabric_connect_ad(fabric_endpoint, store_credentials = TRUE)
-
-# List all available databases
-databases <- fabric_list_databases(con)
-print(databases)
-
-# Choose a database and connect to it
-fabric_disconnect(con)
-target_db <- databases$database_name[1]
-con_db <- fabric_connect_ad(fabric_endpoint, database_name = target_db)
-
-# Work with tables
-tables <- fabric_list_tables(con_db)
-data <- fabric_read_table(con_db, tables[1], limit = 100)
-
-# Clean up
-fabric_disconnect(con_db)
-clear_fabric_credentials()
-```
 
 ## Functions
 
