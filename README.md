@@ -1,14 +1,16 @@
 # fabricConnectAD
 
-A secure R package to connect to Microsoft Fabric using username/password authentication with database discovery capabilities.
+A secure R package to connect to Microsoft Fabric using web-based authentication with database discovery capabilities. Designed specifically for VM environments where interactive authentication may be challenging.
 
 ## Features
 
+- **Web-Based Authentication**: Browser-based credential entry for VM environments
 - **Single Endpoint Connection**: Connect to Fabric endpoint and discover all accessible databases
 - **Secure Authentication**: Encrypted password storage with machine-specific keys
 - **Database Discovery**: List all databases you have access to
 - **Interactive Prompts**: User-friendly email and password prompting
 - **Flexible Connection**: Connect to any database after discovery
+- **VM Compatible**: Works in restricted environments without JavaScript dependencies
 
 ## Installation
 
@@ -24,7 +26,7 @@ A secure R package to connect to Microsoft Fabric using username/password authen
 ```r
 # Install from GitHub using remotes
 install.packages("remotes")
-remotes::install_github("Derekviunza/fabricConnectAD")
+remotes::install_github("AKU-CDIO/fabricConnectAD")
 
 # Load the package
 library(fabricConnectAD)
@@ -35,16 +37,39 @@ library(fabricConnectAD)
 ```r
 # Using devtools
 install.packages("devtools")
-devtools::install_github("Derekviunza/fabricConnectAD")
+devtools::install_github("AKU-CDIO/fabricConnectAD")
 
 # Git clone method
-git clone https://github.com/Derekviunza/fabricConnectAD.git
+git clone https://github.com/AKU-CDIO/fabricConnectAD.git
 cd fabricConnectAD
 install.packages(".", repos=NULL, type='source')
 library(fabricConnectAD)
 ```
 
 ## Quick Start
+
+### Web Authentication (Recommended for VM Environments)
+
+```r
+library(fabricConnectAD)
+
+# Web-based authentication (opens browser for credentials)
+fabric_endpoint <- "your-endpoint.datawarehouse.fabric.microsoft.com"
+con_web <- fabric_connect_web(fabric_endpoint, authentication_method = "ActiveDirectoryPassword")
+
+# List all available databases
+databases <- fabric_list_databases(con_web)
+print(databases)
+
+# Work with data
+tables <- fabric_list_tables(con_web)
+data <- fabric_read_table(con_web, tables[1], limit = 100)
+
+# Clean up
+fabric_disconnect(con_web)
+```
+
+### Traditional Authentication
 
 ```r
 library(fabricConnectAD)
@@ -72,6 +97,22 @@ clear_fabric_credentials()
 ```
 
 ## Functions
+
+### `fabric_connect_web()`
+Web-based authentication for VM environments. Opens a local browser for secure credential entry.
+
+**Parameters:**
+- `fabric_endpoint` - Fabric endpoint URL (required)
+- `database_name` - Database name (optional, defaults to "uzima_db_backup")
+- `email` - User email (optional, pre-fills form)
+- `password` - User password (optional, pre-fills form)
+- `driver` - ODBC driver name (default: "ODBC Driver 18 for SQL Server")
+- `port` - Server port (default: 1433)
+- `timeout` - Connection timeout in seconds (default: 30)
+- `authentication_method` - Authentication method (default: "ActiveDirectoryPassword")
+- `web_port` - Local web server port (default: 8765)
+- `web_timeout` - Web authentication timeout (default: 300)
+- `host` - Local server host (default: "127.0.0.1")
 
 ### `fabric_connect_ad()`
 Connect to Microsoft Fabric endpoint.
@@ -219,9 +260,9 @@ The package implements enterprise-level security:
 
 ### GitHub Repository
 - **Repository**: `fabricConnectAD`
-- **Owner**: `Derekviunza`
-- **URL**: https://github.com/Derekviunza/fabricConnectAD
-- **Installation**: `remotes::install_github("Derekviunza/fabricConnectAD")`
+- **Owner**: `AKU-CDIO`
+- **URL**: https://github.com/AKU-CDIO/fabricConnectAD
+- **Installation**: `remotes::install_github("AKU-CDIO/fabricConnectAD")`
 
 ## License
 
