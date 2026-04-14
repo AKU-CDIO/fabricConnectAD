@@ -304,6 +304,21 @@ Remove stored credentials securely.
 clear_fabric_credentials()
 ```
 
+## Available Functions
+
+The fabricConnectAD package provides these core functions:
+
+- **`fabric_connect_web()`** - VM-compatible web authentication
+- **`fabric_connect_ad()`** - Traditional Active Directory authentication  
+- **`fabric_list_databases()`** - Discover available databases
+- **`fabric_list_tables()`** - List tables in connected database
+- **`fabric_read_table()`** - Read table data with filtering
+- **`fabric_execute_query()`** - Execute custom SQL queries
+- **`fabric_disconnect()`** - Close database connections
+- **`clear_fabric_credentials()`** - Clear stored credentials
+
+All functions are fully implemented and ready for use.
+
 ## Usage Examples
 
 ### Database Discovery Workflow
